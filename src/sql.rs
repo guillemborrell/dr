@@ -13,5 +13,5 @@ pub fn load_csv_from_stdin() -> PolarsResult<DataFrame> {
 
 /// Take a Polars Dataframe and write it as CSV to stdout
 pub fn dump_csv_to_stdout(df: &mut DataFrame) -> Result<(), PolarsError> {
-    CsvWriter::new(io::stdout()).finish(df)
+    CsvWriter::new(io::stdout().lock()).finish(df)
 }
