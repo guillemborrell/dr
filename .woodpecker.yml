@@ -1,0 +1,5 @@
+pipeline:
+  build:
+    image: rust:1-buster
+    commands:
+      - cargo install --path .

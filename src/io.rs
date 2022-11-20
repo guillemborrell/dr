@@ -1,5 +1,6 @@
 use polars::frame::DataFrame;
 use polars::prelude::*;
+use std::fs;
 use std::io;
 use std::io::Read;
 
@@ -26,15 +27,10 @@ pub fn dump_csv_to_stdout(df: &mut DataFrame) {
     };
 }
 
-/// Read parquet format from stdin and return a Polars DataFrame
-pub fn load_parquet_from_stdin() -> DataFrame {
-    let mut buffer: String = String::new();
-    let _res: () = match io::stdin().read_to_string(&mut buffer) {
-        Ok(_ok) => (),
-        Err(_e) => (),
-    };
-    let cursor = io::Cursor::new(buffer.as_bytes());
-    let df = match ParquetReader::new(cursor).finish() {
+/// Read parquet and return a Polars DataFrame
+pub fn read_parquet(path: String) -> DataFrame {
+    let file = fs::File::open(path).expect("Could not open file");
+    let df = match ParquetReader::new(file).finish() {
         Ok(df) => df,
         Err(e) => {
             eprintln!("{e}");

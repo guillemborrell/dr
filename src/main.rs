@@ -11,7 +11,11 @@ fn main() {
                 .arg(arg!(-d --delimiter <String> "Column delimiter").required(false)),
         )
         .subcommand(Command::new("print").about("Pretty prints the table"))
-        .subcommand(Command::new("rpq").about("Read parquet file"))
+        .subcommand(
+            Command::new("rpq")
+                .about("Read parquet file")
+                .arg(arg!([path] "Path to the parquet file")),
+        )
         .get_matches();
 
     if let Some(matches) = matches.subcommand_matches("sql") {
@@ -26,15 +30,17 @@ fn main() {
             let mut df = io::load_csv_from_stdin();
             io::dump_csv_to_stdout(&mut df);
         }
-    }
-
-    if let Some(_matches) = matches.subcommand_matches("print") {
+    } else if let Some(_matches) = matches.subcommand_matches("print") {
         let df = io::load_csv_from_stdin();
         println!("{}", df)
-    }
-
-    if let Some(_matches) = matches.subcommand_matches("rpq") {
-        let mut df = io::load_parquet_from_stdin();
-        io::dump_csv_to_stdout(&mut df);
+    } else if let Some(matches) = matches.subcommand_matches("rpq") {
+        if let Some(path) = matches.get_one::<String>("path") {
+            let mut df = io::read_parquet(path.to_string());
+            io::dump_csv_to_stdout(&mut df);
+        } else {
+            eprintln!("File not found")
+        }
+    } else {
+        println!("No command provided. Please execute dr --help")
     }
 }

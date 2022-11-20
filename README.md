@@ -1,6 +1,6 @@
 # dr.rs
 
-A set of data files (mostly csv and parquet) processing utilities inspired by [csvkit](https://github.com/wireservice/csvkit) with blazing speed, powered by Rust.
+A toolkit to process data files (csv and parquet) using the command line, inspired by [csvkit](https://github.com/wireservice/csvkit), with blazing speed, and powered by Rust.
 
 You may wonder why I'm implementing this, since there's already [xsv](https://github.com/BurntSushi/xsv). There are two reasons for that:
 
@@ -36,6 +36,10 @@ shape: (3, 2)
 │ 2    ┆ 12.278732 │
 └──────┴───────────┘
 ```
+
+## Performance
+
+
 
 ## Built standing on the shoulders of giants
 
