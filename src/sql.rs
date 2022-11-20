@@ -1,17 +1,19 @@
-use polars::frame::DataFrame;
-use polars::prelude::*;
-use std::io;
-use std::io::Read;
+use crate::io::dump_csv_to_stdout;
+use crate::io::load_csv_from_stdin;
+use polars_lazy::frame::IntoLazy;
+use polars_sql::SQLContext;
 
-/// Read from stdin from CSV format and return a Polars DataFrame
-pub fn load_csv_from_stdin() -> PolarsResult<DataFrame> {
-    let mut buffer = String::new();
-    io::stdin().read_to_string(&mut buffer)?;
-    let cursor = io::Cursor::new(buffer.as_bytes());
-    CsvReader::new(cursor).finish()
-}
-
-/// Take a Polars Dataframe and write it as CSV to stdout
-pub fn dump_csv_to_stdout(df: &mut DataFrame) -> Result<(), PolarsError> {
-    CsvWriter::new(io::stdout().lock()).finish(df)
+pub fn execute(statement: &String) {
+    if let Ok(mut context) = SQLContext::try_new() {
+        let df = load_csv_from_stdin();
+        context.register("this", df.lazy());
+        if let Ok(res) = context.execute(statement) {
+            if let Ok(mut res) = res.collect() {
+                dump_csv_to_stdout(&mut res);
+            };
+        };
+        if let Err(e) = context.execute(statement) {
+            eprintln!("Query execution error {e}")
+        };
+    };
 }

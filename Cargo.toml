@@ -1,5 +1,5 @@
 [package]
-name = "csvgr"
+name = "dr"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,5 +7,7 @@ edition = "2021"
 
 [dependencies]
 clap = {version = "4.0", features = ["cargo"]}
-polars = "0.25.1"
+polars = "0.25"
 polars-sql = "0.2.1"
+polars-lazy = "0.25"
+polars-io = {"version" = "0.25", features = ["parquet"]}
