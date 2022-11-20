@@ -1,5 +1,9 @@
 pipeline:
-  build:
+  release:
     image: rust:1-buster
+    when: 
+      event: tag
+    secrets: [ gitea_api_key ]
     commands:
-      - cargo install --path .
+      - cargo build --release
+      - curl --user guillem:$GITEA_API_KEY https://git.guillemborrell.es/api/packages/guillem/generic/dr/$CI_COMMIT_TAG/dr
