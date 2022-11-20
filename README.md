@@ -1,10 +1,10 @@
-# csvgr.rs
+# dr.rs
 
-A set of csv files processing utilities inspired by [csvkit](https://github.com/wireservice/csvkit) with blazing speed, powered by Rust.
+A set of data files (mostly csv and parquet) processing utilities inspired by [csvkit](https://github.com/wireservice/csvkit) with blazing speed, powered by Rust.
 
 You may wonder why I'm implementing this, since there's already [xsv](https://github.com/BurntSushi/xsv). There are two reasons for that:
 
-1. This is the project I'm implementing to learn Rust
+1. This what I'm implementing to learn Rust
 2. The Rust data ecosystem has evolved immensely since xsv was sarted. Now we can add things like SQL commands to filter csv files, or translate results to parquet files.
 
 ## Example
@@ -22,7 +22,7 @@ Wine,Alcohol,Malic.acid,Ash,Acl,Mg,Phenols,Flavanoids,Nonflavanoid.phenols,Proan
 1,14.06,2.15,2.61,17.6,121,2.6,2.51,.31,1.25,5.05,1.06,3.58,1295
 1,14.83,1.64,2.17,14,97,2.8,2.98,.29,1.98,5.2,1.08,2.85,1045
 
-$ cat wine.csv  | ./target/release/csvgr sql "select Wine, avg(Alcohol) from this group by Wine" | ./target/release/csvgr print
+$ cat wine.csv | dr sql "select Wine, avg(Alcohol) from this group by Wine" | dr print
 shape: (3, 2)
 ┌──────┬───────────┐
 │ Wine ┆ Alcohol   │
