@@ -41,6 +41,75 @@ shape: (3, 2)
 
 ## Performance
 
+`dr` is implemented in Rust with the goal of achieving the highest possible performance. Take for instance a simple read, groupby, and aggregate operation with ~30MB of data:
+
+```bash
+$ time cat data/walmart_train.csv | ./target/release/dr sql "select Dept, avg("Weekly_Sales") from this group by Dept" | ./target/release/dr print
+shape: (81, 2)
+┌──────┬──────────────┐
+│ Dept ┆ Weekly_Sales │
+│ ---  ┆ ---          │
+│ i64  ┆ f64          │
+╞══════╪══════════════╡
+│ 30   ┆ 4118.197208  │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 16   ┆ 14245.63827  │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 56   ┆ 3833.706211  │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 24   ┆ 6353.604562  │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ ...  ┆ ...          │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 31   ┆ 2339.440287  │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 59   ┆ 694.463564   │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 27   ┆ 1583.437727  │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ 77   ┆ 328.9618     │
+└──────┴──────────────┘
+
+real    0m0.089s
+user    0m0.116s
+sys     0m0.036s
+```
+
+Let's compare that with the followint Python script that leverages Pandas to read the data, and compute the aggregation:
+
+```python
+#!/usr/bin/env python3
+
+import sys
+import pandas as pd
+
+df = pd.read_csv(sys.stdin)
+print(df.groupby("Dept", sort=False, as_index=False).Weekly_Sales.mean())
+```
+
+```bash
+$ time cat data/walmart_train.csv | ./python/group.py 
+    Dept  Weekly_Sales
+0      1  19213.485088
+1      2  43607.020113
+2      3  11793.698516
+3      4  25974.630238
+4      5  21365.583515
+..   ...           ...
+76    99    415.487065
+77    39     11.123750
+78    50   2658.897010
+79    43      1.193333
+80    65  45441.706224
+
+[81 rows x 2 columns]
+
+real    0m0.717s
+user    0m0.627s
+sys     0m0.282s
+```
+
+Note that there's roughly a 6x speedup. This considering that this operation in particular is heavily optimized in Pandas and most of the run time is spent in parsing and reading from stdin.
 
 
 ## Built standing on the shoulders of giants
