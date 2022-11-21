@@ -1,8 +1,8 @@
 # dr.rs
 
-[![status-badge](https://ci.guillemborrell.es/api/badges/guillem/dr/status.svg)](https://ci.guillemborrell.es/guillem/dr)
+[![status-badge](https://ci.guillemborrell.es/api/badges/guillem/dr/status.svg)](https://ci.guillemborrell.es/guillem/dr) | [Download](https://git.guillemborrell.es/guillem/-/packages/generic/dr)
 
-A toolkit to process data files (csv and parquet) using the command line, inspired by [csvkit](https://github.com/wireservice/csvkit), with blazing speed, and powered by Rust.
+A toolkit to process data files (csv and parquet) using the command line, inspired by [csvkit](https://github.com/wireservice/csvkit), with blazing speed, and powered by Rust. 
 
 You may wonder why I'm implementing this, since there's already [xsv](https://github.com/BurntSushi/xsv). There are two reasons for that:
 
