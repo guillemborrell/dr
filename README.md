@@ -2,7 +2,7 @@
 
 [![status-badge](https://ci.guillemborrell.es/api/badges/guillem/dr/status.svg)](https://ci.guillemborrell.es/guillem/dr) | [Download](https://git.guillemborrell.es/guillem/-/packages/generic/dr)
 
-A toolkit to process data files (csv and parquet) using the command line, inspired by [csvkit](https://github.com/wireservice/csvkit), with blazing speed, and powered by Rust. 
+A toolkit to process data files (csv and parquet) using the command line, inspired by [csvkit](https://github.com/wireservice/csvkit), with blazing speed, and powered by Rust.
 
 You may wonder why I'm implementing this, since there's already [xsv](https://github.com/BurntSushi/xsv). There are two reasons for that:
 
@@ -38,6 +38,50 @@ shape: (3, 2)
 │ 2    ┆ 12.278732 │
 └──────┴───────────┘
 ```
+
+## Howto
+
+The `dr` command offers a set of subcommands, each one of them with a different functionality. You can get the available subcommands with:
+
+```bash
+$ dr --help
+Command-line data file processing in Rust
+
+Usage: dr [COMMAND]
+
+Commands:
+  sql    Runs a sql statement on the file
+  print  Pretty prints the table
+  rpq    Read parquet file
+  help   Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help information
+  -V, --version  Print version information
+```
+
+Subcommands can be pipelined unless reading from a file, writing to a file, or pretty prints data. What goes through the pipeline is a plain-text comma separated values with a header. While this may not be the best choice in terms of performance, allows `dr` subcommands to be combined with the usual unix-style command-line tools like `cat`, `head`, `grep`, `awk` and `sed`:
+
+```bash
+$ cat wine.csv | head -n 5 | dr print
+shape: (4, 14)
+┌──────┬─────────┬────────────┬──────┬─────┬───────────┬──────┬──────┬─────────┐
+│ Wine ┆ Alcohol ┆ Malic.acid ┆ Ash  ┆ ... ┆ Color.int ┆ Hue  ┆ OD   ┆ Proline │
+│ ---  ┆ ---     ┆ ---        ┆ ---  ┆     ┆ ---       ┆ ---  ┆ ---  ┆ ---     │
+│ i64  ┆ f64     ┆ f64        ┆ f64  ┆     ┆ f64       ┆ f64  ┆ f64  ┆ i64     │
+╞══════╪═════════╪════════════╪══════╪═════╪═══════════╪══════╪══════╪═════════╡
+│ 1    ┆ 14.23   ┆ 1.71       ┆ 2.43 ┆ ... ┆ 5.64      ┆ 1.04 ┆ 3.92 ┆ 1065    │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ 1    ┆ 13.2    ┆ 1.78       ┆ 2.14 ┆ ... ┆ 4.38      ┆ 1.05 ┆ 3.4  ┆ 1050    │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ 1    ┆ 13.16   ┆ 2.36       ┆ 2.67 ┆ ... ┆ 5.68      ┆ 1.03 ┆ 3.17 ┆ 1185    │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ 1    ┆ 14.37   ┆ 1.95       ┆ 2.5  ┆ ... ┆ 7.8       ┆ 0.86 ┆ 3.45 ┆ 1480    │
+└──────┴─────────┴────────────┴──────┴─────┴───────────┴──────┴──────┴─────────┘
+```
+
+Note that when `dr` loads csv data also tries to guess the data type of each field.
+
 
 ## Performance
 
@@ -88,7 +132,7 @@ print(df.groupby("Dept", sort=False, as_index=False).Weekly_Sales.mean())
 ```
 
 ```bash
-$ time cat data/walmart_train.csv | ./python/group.py 
+$ time cat data/walmart_train.csv | ./python/group.py
     Dept  Weekly_Sales
 0      1  19213.485088
 1      2  43607.020113
