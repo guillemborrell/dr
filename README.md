@@ -53,6 +53,7 @@ Commands:
   sql    Runs a sql statement on the file
   print  Pretty prints the table
   rpq    Read parquet file
+  wpq    Write to a parquet file
   help   Print this message or the help of the given subcommand(s)
 
 Options:
@@ -82,13 +83,41 @@ shape: (4, 14)
 
 Note that when `dr` loads csv data also tries to guess the data type of each field.
 
+### Parquet
+
+`dr` is also useful to translate your csv files to parquet with a single command:
+
+```bash
+$ cat wine.csv | dr wpq wine.pq
+```
+
+Or explore parquet files
+
+```bash
+$ dr rpq wine.pq | head -n 5 | dr print
+shape: (4, 14)
+┌──────┬─────────┬────────────┬──────┬─────┬───────────┬──────┬──────┬─────────┐
+│ Wine ┆ Alcohol ┆ Malic.acid ┆ Ash  ┆ ... ┆ Color.int ┆ Hue  ┆ OD   ┆ Proline │
+│ ---  ┆ ---     ┆ ---        ┆ ---  ┆     ┆ ---       ┆ ---  ┆ ---  ┆ ---     │
+│ i64  ┆ f64     ┆ f64        ┆ f64  ┆     ┆ f64       ┆ f64  ┆ f64  ┆ i64     │
+╞══════╪═════════╪════════════╪══════╪═════╪═══════════╪══════╪══════╪═════════╡
+│ 1    ┆ 14.23   ┆ 1.71       ┆ 2.43 ┆ ... ┆ 5.64      ┆ 1.04 ┆ 3.92 ┆ 1065    │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ 1    ┆ 13.2    ┆ 1.78       ┆ 2.14 ┆ ... ┆ 4.38      ┆ 1.05 ┆ 3.4  ┆ 1050    │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ 1    ┆ 13.16   ┆ 2.36       ┆ 2.67 ┆ ... ┆ 5.68      ┆ 1.03 ┆ 3.17 ┆ 1185    │
+├╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
+│ 1    ┆ 14.37   ┆ 1.95       ┆ 2.5  ┆ ... ┆ 7.8       ┆ 0.86 ┆ 3.45 ┆ 1480    │
+└──────┴─────────┴────────────┴──────┴─────┴───────────┴──────┴──────┴─────────┘
+```
+
 
 ## Performance
 
 `dr` is implemented in Rust with the goal of achieving the highest possible performance. Take for instance a simple read, groupby, and aggregate operation with ~30MB of data:
 
 ```bash
-$ time cat data/walmart_train.csv | ./target/release/dr sql "select Dept, avg("Weekly_Sales") from this group by Dept" | ./target/release/dr print
+$ time cat data/walmart_train.csv | dr sql "select Dept, avg("Weekly_Sales") from this group by Dept" | dr print
 shape: (81, 2)
 ┌──────┬──────────────┐
 │ Dept ┆ Weekly_Sales │

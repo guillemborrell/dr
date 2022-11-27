@@ -39,3 +39,30 @@ pub fn read_parquet(path: String) -> DataFrame {
     };
     df
 }
+
+/// Write a Polars DataFrame to Parquet
+pub fn write_parquet(
+    mut df: DataFrame,
+    path: String,
+    compression: String,
+    statistics: bool,
+    chunksize: Option<usize>,
+) {
+    // Selected compression not implemented yet
+    let mut _file = match fs::File::create(path) {
+        Ok(mut file) => {
+            let mut w = ParquetWriter::new(&mut file);
+            if statistics {
+                w = w.with_statistics(statistics);
+            }
+            if chunksize.unwrap_or(0) > 0 {
+                w = w.with_row_group_size(chunksize);
+            }
+            let _r = match w.finish(&mut df) {
+                Ok(_r) => (),
+                Err(e) => eprintln!("{e}"),
+            };
+        }
+        Err(e) => eprintln!("{e}"),
+    };
+}

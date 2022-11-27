@@ -16,6 +16,11 @@ fn main() {
                 .about("Read parquet file")
                 .arg(arg!([path] "Path to the parquet file")),
         )
+        .subcommand(
+            Command::new("wpq")
+                .about("Write to a paquet file")
+                .arg(arg!([path] "Path to the new parquet file")),
+        )
         .get_matches();
 
     if let Some(matches) = matches.subcommand_matches("sql") {
@@ -39,6 +44,13 @@ fn main() {
             io::dump_csv_to_stdout(&mut df);
         } else {
             eprintln!("File not found")
+        }
+    } else if let Some(matches) = matches.subcommand_matches("wpq") {
+        if let Some(path) = matches.get_one::<String>("path") {
+            let df = io::load_csv_from_stdin();
+            io::write_parquet(df, path.to_string(), "lz4raw".to_string(), true, Some(0));
+        } else {
+            eprintln!("Could now write to parquet");
         }
     } else {
         println!("No command provided. Please execute dr --help")
