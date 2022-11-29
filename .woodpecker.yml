@@ -1,10 +1,30 @@
 pipeline:
+  build:
+    image: rust:1-buster
+    when:
+      event: tag
+    commands:
+      - cargo build --release
+  buildlinuxaarch64:
+    image: rust:1-buster
+    when:
+      event: tag
+    commands:
+      - apt-get update && apt-get install gcc-aarch64-linux-gnu
+      - rustup target add aarch64-unknown-linux-gnu
+      - cargo build --release --target gcc-aarch64-linux-gnu
   release:
     image: rust:1-buster
     when: 
       event: tag
-    secrets: [ gitea_api_key , cargo_registry_token ]
+    secrets: [ gitea_api_key ]
     commands:
-      - cargo build --release
       - curl --user guillem:$GITEA_API_KEY --upload-file target/release/dr https://git.guillemborrell.es/api/packages/guillem/generic/dr/$CI_COMMIT_TAG/dr-linux-amd64
+      - curl --user guillem:$GITEA_API_KEY --upload-file target/aarch64-unknown-linux-gnu/release/dr https://git.guillemborrell.es/api/packages/guillem/generic/dr/$CI_COMMIT_TAG/dr-linux-aarch64
+  publish:
+    image: rust:1-buster
+    when:
+      event: tag
+    secrets: [ cargo_registry_token ]
+    commands:
       - cargo publish --token $CARGO_REGISTRY_TOKEN
