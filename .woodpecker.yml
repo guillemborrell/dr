@@ -10,7 +10,7 @@ pipeline:
     when:
       event: tag
     commands:
-      - apt-get update && apt-get install gcc-aarch64-linux-gnu
+      - apt-get update && apt-get install -y gcc-aarch64-linux-gnu
       - rustup target add aarch64-unknown-linux-gnu
       - cargo build --release --target gcc-aarch64-linux-gnu
   release:
