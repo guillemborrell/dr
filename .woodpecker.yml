@@ -30,7 +30,7 @@ pipeline:
     commands:
       - curl --user guillem:$GITEA_API_KEY --upload-file target/release/dr https://git.guillemborrell.es/api/packages/guillem/generic/dr/$CI_COMMIT_TAG-linux-amd64/dr
       - curl --user guillem:$GITEA_API_KEY --upload-file target/aarch64-unknown-linux-gnu/release/dr https://git.guillemborrell.es/api/packages/guillem/generic/dr/$CI_COMMIT_TAG-linux-aarch64/dr
-      - curl --user guillem:$GITEA_API_KEY --upload-file target/x86_64-pc-windows-gnu/release/dr https://git.guillemborrell.es/api/packages/guillem/generic/dr/$CI_COMMIT_TAG-win-amd64/dr
+      - curl --user guillem:$GITEA_API_KEY --upload-file target/x86_64-pc-windows-gnu/release/dr.exe https://git.guillemborrell.es/api/packages/guillem/generic/dr/$CI_COMMIT_TAG-win-amd64/dr.exe
   publish:
     image: rust:1-bullseye
     when:
