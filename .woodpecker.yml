@@ -10,6 +10,7 @@ pipeline:
     when:
       event: tag
     commands:
+      - export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
       - apt-get update && apt-get install -y gcc-aarch64-linux-gnu
       - rustup target add aarch64-unknown-linux-gnu
       - cargo build --release --target aarch64-unknown-linux-gnu
