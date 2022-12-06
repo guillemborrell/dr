@@ -1,7 +1,7 @@
 [package]
 name = "dr"
 description = "Command-line data file processing in Rust"
-version = "0.4"
+version = "0.4.1"
 edition = "2021"
 include = [
     "**/*.rs",
