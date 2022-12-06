@@ -1,19 +1,15 @@
-use crate::io::dump_csv_to_stdout;
-use crate::io::load_csv_from_stdin;
-use polars_lazy::frame::IntoLazy;
-use polars_sql::SQLContext;
+use polars::prelude::LazyFrame;
+use polars::sql::SQLContext;
 
-pub fn execute(statement: &String) {
-    if let Ok(mut context) = SQLContext::try_new() {
-        let df = load_csv_from_stdin();
-        context.register("this", df.lazy());
-        if let Ok(res) = context.execute(statement) {
-            if let Ok(mut res) = res.collect() {
-                dump_csv_to_stdout(&mut res);
-            };
-        };
-        if let Err(e) = context.execute(statement) {
-            eprintln!("Query execution error {e}")
-        };
-    };
+pub fn execute(ldf: LazyFrame, statement: &String) -> LazyFrame {
+    let mut context = SQLContext::try_new().expect("Could not create context");
+    context.register("this", ldf);
+
+    match context.execute(statement) {
+        Ok(res) => res,
+        Err(e) => {
+            eprintln!("Query execution error {e}");
+            LazyFrame::default()
+        }
+    }
 }

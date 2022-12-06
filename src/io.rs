@@ -1,22 +1,53 @@
-use polars::frame::DataFrame;
 use polars::prelude::*;
 use std::fs;
 use std::io;
 use std::io::Read;
 
-/// Read CSV format from stdin and return a Polars DataFrame
-pub fn load_csv_from_stdin() -> DataFrame {
-    let mut buffer = String::new();
-    let _res: () = match io::stdin().read_to_string(&mut buffer) {
+/// Read CSV file
+pub fn read_csv(path: String) -> LazyFrame {
+    LazyCsvReader::new(path)
+        .finish()
+        .expect("Could not load file")
+}
+
+/// Read parquet and return a Polars LazyFrame
+pub fn read_parquet(path: String) -> LazyFrame {
+    LazyFrame::scan_parquet(path, ScanArgsParquet::default()).expect("Could not read parquet file")
+}
+
+/// Read IPC setream
+pub fn read_ipc() -> LazyFrame {
+    let mut buffer = Vec::new();
+    let _res: () = match io::stdin().lock().read_to_end(&mut buffer) {
         Ok(_ok) => (),
         Err(_e) => (),
     };
-    let cursor = io::Cursor::new(buffer.as_bytes());
-    let df = match CsvReader::new(cursor).finish() {
-        Ok(df) => df,
-        Err(_e) => DataFrame::default(),
+    let cursor = io::Cursor::new(buffer);
+    match IpcStreamReader::new(cursor).finish() {
+        Ok(df) => df.lazy(),
+        Err(_e) => LazyFrame::default(),
+    }
+}
+
+/// Read CSV format from stdin and return a Polars DataFrame
+pub fn load_csv_from_stdin() -> LazyFrame {
+    let mut buffer = Vec::new();
+    let _res: () = match io::stdin().lock().read_to_end(&mut buffer) {
+        Ok(_ok) => (),
+        Err(_e) => (),
     };
-    df
+    let cursor = io::Cursor::new(buffer);
+    match CsvReader::new(cursor).finish() {
+        Ok(df) => df.lazy(),
+        Err(_e) => LazyFrame::default(),
+    }
+}
+
+/// Write to IPC steram
+pub fn write_ipc(df: LazyFrame) {
+    IpcStreamWriter::new(io::stdout().lock())
+        .finish(&mut df.collect().expect("Could not collect dataframe"))
+        .expect("Could not write to stream");
 }
 
 /// Take a Polars Dataframe and write it as CSV to stdout
@@ -25,19 +56,6 @@ pub fn dump_csv_to_stdout(df: &mut DataFrame) {
         Ok(_ok) => (),
         Err(_e) => (),
     };
-}
-
-/// Read parquet and return a Polars DataFrame
-pub fn read_parquet(path: String) -> DataFrame {
-    let file = fs::File::open(path).expect("Could not open file");
-    let df = match ParquetReader::new(file).finish() {
-        Ok(df) => df,
-        Err(e) => {
-            eprintln!("{e}");
-            DataFrame::default()
-        }
-    };
-    df
 }
 
 /// Write a Polars DataFrame to Parquet
