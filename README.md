@@ -1,16 +1,18 @@
 # dr.rs
 
-[![status-badge](https://ci.guillemborrell.es/api/badges/guillem/dr/status.svg)](https://ci.guillemborrell.es/guillem/dr) | [Download](https://git.guillemborrell.es/guillem/-/packages/generic/dr)
+[![status-badge](https://ci.guillemborrell.es/api/badges/guillem/dr/status.svg)](https://ci.guillemborrell.es/guillem/dr) | [Download](https://git.guillemborrell.es/guillem/-/packages/generic/dr) | [Source](https://git.guillemborrell.es/guillem/dr) | [Bugs](https://github.com/guillemborrell/dr)
 
 A toolkit to process data files (csv and parquet) using the command line, inspired by [csvkit](https://github.com/wireservice/csvkit), with blazing speed, and powered by Rust.
 
 You may wonder why I'm implementing this, since there's already [xsv](https://github.com/BurntSushi/xsv). There are two reasons for that:
 
-1. This what I'm implementing to learn Rust
+1. This what I'm implementing to learn Rust.
 2. The Rust data ecosystem has evolved immensely since xsv was sarted. Now we can add things like SQL commands to filter csv files, or translate results to parquet files.
 
 
-## Help
+## TL;DR
+
+You can install dr the rust way with `cargo install dr` but downloading a binary from [here](https://git.guillemborrell.es/guillem/-/packages/generic/dr) may be all you need.
 
 ```
 $ dr --help
