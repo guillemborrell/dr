@@ -1,4 +1,4 @@
-use polars::prelude::LazyFrame;
+use polars_lazy::lazy::LazyFrame;
 use polars::sql::SQLContext;
 
 pub fn execute(ldf: LazyFrame, statement: &String) -> LazyFrame {
