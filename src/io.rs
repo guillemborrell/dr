@@ -1,7 +1,8 @@
-use polars::prelude::*;
-use std::fs;
+use polars_io::prelude::*;
+use polars_lazy::prelude::*;
 use std::io;
 use std::io::Read;
+use std::path::PathBuf;
 
 /// Read CSV file
 pub fn read_csv(path: String) -> LazyFrame {
@@ -51,36 +52,28 @@ pub fn write_ipc(df: LazyFrame) {
 }
 
 /// Take a Polars Dataframe and write it as CSV to stdout
-pub fn dump_csv_to_stdout(df: &mut DataFrame) {
-    let _res: () = match CsvWriter::new(io::stdout().lock()).finish(df) {
+pub fn dump_csv_to_stdout(ldf: LazyFrame) {
+    let _res: () = match CsvWriter::new(io::stdout().lock())
+        .finish(&mut ldf.collect().expect("Could not collect"))
+    {
         Ok(_ok) => (),
         Err(_e) => (),
     };
 }
 
 /// Write a Polars DataFrame to Parquet
-pub fn write_parquet(
-    mut df: DataFrame,
-    path: String,
-    compression: String,
-    statistics: bool,
-    chunksize: Option<usize>,
-) {
+pub fn write_parquet(ldf: LazyFrame, path: String) {
     // Selected compression not implemented yet
-    let mut _file = match fs::File::create(path) {
-        Ok(mut file) => {
-            let mut w = ParquetWriter::new(&mut file);
-            if statistics {
-                w = w.with_statistics(statistics);
-            }
-            if chunksize.unwrap_or(0) > 0 {
-                w = w.with_row_group_size(chunksize);
-            }
-            let _r = match w.finish(&mut df) {
-                Ok(_r) => (),
-                Err(e) => eprintln!("{e}"),
-            };
-        }
-        Err(e) => eprintln!("{e}"),
-    };
+    let mut p = PathBuf::new();
+    p.push(path);
+    ldf.sink_parquet(
+        p,
+        ParquetWriteOptions {
+            compression: ParquetCompression::Snappy,
+            statistics: true,
+            row_group_size: None,
+            data_pagesize_limit: None,
+            maintain_order: false,
+        },
+    ).expect("Could not save");
 }

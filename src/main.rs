@@ -93,16 +93,10 @@ fn main() {
                 println!("{}", df)
             } else {
                 if _matches.get_flag("text") {
-                    io::dump_csv_to_stdout(&mut ldf.collect().expect("Could not collect"));
+                    io::dump_csv_to_stdout(ldf);
                 } else {
                     if let Some(path) = _matches.get_one::<String>("parquet") {
-                        io::write_parquet(
-                            ldf.collect().expect("Could not collect"),
-                            path.to_string(),
-                            "lz4raw".to_string(),
-                            true,
-                            Some(0),
-                        );
+                        io::write_parquet(ldf, path.to_string());
                     } else {
                         io::write_ipc(ldf);
                     }
@@ -142,16 +136,10 @@ fn main() {
                 println!("{}", df)
             } else {
                 if _matches.get_flag("text") {
-                    io::dump_csv_to_stdout(&mut ldf.collect().expect("Could not collect"));
+                    io::dump_csv_to_stdout(ldf);
                 } else {
                     if let Some(path) = _matches.get_one::<String>("parquet") {
-                        io::write_parquet(
-                            ldf.collect().expect("Could not collect"),
-                            path.to_string(),
-                            "lz4raw".to_string(),
-                            true,
-                            Some(0),
-                        );
+                        io::write_parquet(ldf, path.to_string());
                     } else {
                         io::write_ipc(ldf);
                     }
@@ -162,18 +150,12 @@ fn main() {
         }
     } else if let Some(_matches) = matches.subcommand_matches("wpq") {
         if let Some(path) = _matches.get_one::<String>("path") {
-            let df = if _matches.get_flag("text") {
+            let ldf = if _matches.get_flag("text") {
                 io::load_csv_from_stdin()
             } else {
                 io::read_ipc()
             };
-            io::write_parquet(
-                df.collect().expect("Could not collect"),
-                path.to_string(),
-                "lz4raw".to_string(),
-                true,
-                Some(0),
-            );
+            io::write_parquet(ldf, path.to_string());
         } else {
             eprintln!("Could now write to parquet");
         }
