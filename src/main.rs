@@ -1,6 +1,7 @@
 mod io;
 mod sql;
 use clap::{arg, command, ArgAction, Command};
+use polars_lazy::prelude::*;
 
 fn main() {
     let matches = command!()
@@ -56,11 +57,19 @@ fn main() {
                         .action(ArgAction::SetTrue),
                 )
                 .arg(
+                    arg!(-i --stdin ... "Read from stdin instead than from a file")
+                        .required(false)
+                        .action(ArgAction::SetTrue),
+                )
+                .arg(
                     arg!(-t --text ... "Output text instead of binary")
                         .required(false)
                         .action(ArgAction::SetTrue),
                 )
-                .arg(arg!(-P --text <String> "Write the result as a parquet file").required(false))
+                .arg(
+                    arg!(-P --parquet <String> "Write the result as a parquet file")
+                        .required(false),
+                )
                 .arg(
                     arg!(-a --head ... "Print the header of the table")
                         .required(false)
@@ -123,30 +132,33 @@ fn main() {
         };
         println!("{}", df.collect().expect("Could not collect"));
     } else if let Some(_matches) = matches.subcommand_matches("rpq") {
-        if let Some(path) = _matches.get_one::<String>("path") {
-            let mut ldf = io::read_parquet(path.to_string());
-            if let Some(query) = _matches.get_one::<String>("query") {
-                ldf = sql::execute(ldf, query);
-            }
-            if _matches.get_flag("summary") {
-                let df = ldf.collect().expect("Could not collect");
-                println!("{}", df.describe(None));
-            } else if _matches.get_flag("head") {
-                let df = ldf.fetch(5).expect("Could not fetch");
-                println!("{}", df)
+        let mut ldf = LazyFrame::default();
+        if _matches.get_flag("stdin") {
+            ldf = io::load_parquet_from_stdin();
+        } else if let Some(path) = _matches.get_one::<String>("path") {
+            ldf = io::read_parquet(path.to_string());
+        } else {
+            eprintln!("File not found or not reading from stdin")
+        }
+        if let Some(query) = _matches.get_one::<String>("query") {
+            ldf = sql::execute(ldf, query);
+        }
+        if _matches.get_flag("summary") {
+            let df = ldf.collect().expect("Could not collect");
+            println!("{}", df.describe(None));
+        } else if _matches.get_flag("head") {
+            let df = ldf.fetch(5).expect("Could not fetch");
+            println!("{}", df)
+        } else {
+            if _matches.get_flag("text") {
+                io::dump_csv_to_stdout(ldf);
             } else {
-                if _matches.get_flag("text") {
-                    io::dump_csv_to_stdout(ldf);
+                if let Some(path) = _matches.get_one::<String>("parquet") {
+                    io::write_parquet(ldf, path.to_string());
                 } else {
-                    if let Some(path) = _matches.get_one::<String>("parquet") {
-                        io::write_parquet(ldf, path.to_string());
-                    } else {
-                        io::write_ipc(ldf);
-                    }
+                    io::write_ipc(ldf);
                 }
             }
-        } else {
-            eprintln!("File not found")
         }
     } else if let Some(_matches) = matches.subcommand_matches("wpq") {
         if let Some(path) = _matches.get_one::<String>("path") {

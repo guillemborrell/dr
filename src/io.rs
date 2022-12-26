@@ -44,6 +44,20 @@ pub fn load_csv_from_stdin() -> LazyFrame {
     }
 }
 
+/// Read CSV format from stdin and return a Polars DataFrame
+pub fn load_parquet_from_stdin() -> LazyFrame {
+    let mut buffer = Vec::new();
+    let _res: () = match io::stdin().lock().read_to_end(&mut buffer) {
+        Ok(_ok) => (),
+        Err(_e) => (),
+    };
+    let cursor = io::Cursor::new(buffer);
+    match ParquetReader::new(cursor).finish() {
+        Ok(df) => df.lazy(),
+        Err(_e) => LazyFrame::default(),
+    }
+}
+
 /// Write to IPC steram
 pub fn write_ipc(df: LazyFrame) {
     IpcStreamWriter::new(io::stdout().lock())
@@ -75,5 +89,6 @@ pub fn write_parquet(ldf: LazyFrame, path: String) {
             data_pagesize_limit: None,
             maintain_order: false,
         },
-    ).expect("Could not save");
+    )
+    .expect("Could not save");
 }
