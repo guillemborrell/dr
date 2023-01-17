@@ -1,4 +1,5 @@
 mod io;
+mod schema;
 mod sql;
 use clap::{arg, command, ArgAction, Command};
 use polars_lazy::prelude::*;
@@ -24,6 +25,22 @@ fn main() {
                 .arg(arg!(-P --parquet <String> "Write output as a parquet file").required(false))
                 .arg(
                     arg!(-a --head ... "Print the header of the table")
+                        .required(false)
+                        .action(ArgAction::SetTrue),
+                ),
+        )
+        .subcommand(
+            Command::new("schema")
+                .about("Several table schema related utilities")
+                .arg(arg!(-n --name <String> "Table name").required(false))
+                .arg(arg!(-l --strlen <String> "Default length for string columns").required(false))
+                .arg(
+                    arg!(-s --summary ... "Summarize the schema")
+                        .required(false)
+                        .action(ArgAction::SetTrue),
+                )
+                .arg(
+                    arg!(-p --postgresql ... "Create a postgresql table with schema")
                         .required(false)
                         .action(ArgAction::SetTrue),
                 ),
@@ -87,7 +104,6 @@ fn main() {
                 .arg(arg!([path] "Path to the new parquet file")),
         )
         .get_matches();
-
     if let Some(_matches) = matches.subcommand_matches("csv") {
         if let Some(path) = _matches.get_one::<String>("path") {
             let mut ldf = io::read_csv(path.to_string());
@@ -170,6 +186,19 @@ fn main() {
             io::write_parquet(ldf, path.to_string());
         } else {
             eprintln!("Could now write to parquet");
+        }
+    } else if let Some(_matches) = matches.subcommand_matches("schema") {
+        if _matches.get_flag("summary") {
+            schema::print_schema(io::read_ipc());
+        } else if _matches.get_flag("postgresql") {
+            let name = _matches
+                .get_one::<String>("name")
+                .expect("Please provide a table name");
+            let strlen: u32 = match _matches.get_one::<String>("strlen") {
+                Some(strlen) => strlen.parse::<u32>().unwrap(),
+                None => 128,
+            };
+            schema::print_create(io::read_ipc(), name.as_str(), strlen);
         }
     } else {
         println!("No command provided. Please execute dr --help")
