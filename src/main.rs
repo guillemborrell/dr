@@ -110,31 +110,31 @@ fn main() {
         )
         .get_matches();
     if let Some(_matches) = matches.subcommand_matches("csv") {
-        if let Some(path) = _matches.get_one::<String>("path") {
-            let mut ldf = LazyFrame::default();
-            if _matches.get_flag("stdin") {
-                ldf = io::load_csv_from_stdin();
+        let mut ldf = if _matches.get_flag("stdin") {
+            io::load_csv_from_stdin()
+        } else {
+            let path = _matches
+                .get_one::<String>("path")
+                .expect("Please, provide a file");
+            io::read_csv(path.to_string())
+        };
+        if let Some(query) = _matches.get_one::<String>("query") {
+            ldf = sql::execute(ldf, query);
+        }
+        if _matches.get_flag("summary") {
+            let df = ldf.collect().expect("Could not collect");
+            println!("{}", df.describe(None));
+        } else if _matches.get_flag("head") {
+            let df = ldf.fetch(5).expect("Could not fetch");
+            println!("{}", df)
+        } else {
+            if _matches.get_flag("text") {
+                io::dump_csv_to_stdout(ldf);
             } else {
-                ldf = io::read_csv(path.to_string());
-            }
-            if let Some(query) = _matches.get_one::<String>("query") {
-                ldf = sql::execute(ldf, query);
-            }
-            if _matches.get_flag("summary") {
-                let df = ldf.collect().expect("Could not collect");
-                println!("{}", df.describe(None));
-            } else if _matches.get_flag("head") {
-                let df = ldf.fetch(5).expect("Could not fetch");
-                println!("{}", df)
-            } else {
-                if _matches.get_flag("text") {
-                    io::dump_csv_to_stdout(ldf);
+                if let Some(path) = _matches.get_one::<String>("parquet") {
+                    io::write_parquet(ldf, path.to_string());
                 } else {
-                    if let Some(path) = _matches.get_one::<String>("parquet") {
-                        io::write_parquet(ldf, path.to_string());
-                    } else {
-                        io::write_ipc(ldf);
-                    }
+                    io::write_ipc(ldf);
                 }
             }
         }
