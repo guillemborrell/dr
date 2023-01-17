@@ -20,6 +20,7 @@ pub fn print_create(ldf: LazyFrame, table_name: &str, default_strlen: u32) {
         .to_string(PostgresQueryBuilder)];
 
     // Alter table adding fields one by one
+    let mut unnamed_cols_counter = 0;
     for f in schema.iter_fields() {
         let dtype = match f.data_type().to_string().as_str() {
             "i64" => ColumnType::Integer,
@@ -28,9 +29,17 @@ pub fn print_create(ldf: LazyFrame, table_name: &str, default_strlen: u32) {
             "bool" => ColumnType::Boolean,
             &_ => todo!("Datatype {} not supported", f.data_type().to_string()),
         };
+
+        let name = if f.name.is_empty() {
+            unnamed_cols_counter += 1;
+            format!("Column{}", unnamed_cols_counter)
+        } else {
+            f.name
+        };
+
         let table = Table::alter()
             .table(Alias::new(table_name))
-            .add_column(&mut ColumnDef::new_with_type(Alias::new(&f.name), dtype))
+            .add_column(&mut ColumnDef::new_with_type(Alias::new(&name), dtype))
             .to_owned();
         statements.push(table.to_string(PostgresQueryBuilder));
     }
