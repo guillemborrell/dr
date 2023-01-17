@@ -77,7 +77,8 @@ pub fn dump_csv_to_stdout(ldf: LazyFrame) {
 }
 
 /// Write a Polars DataFrame to Parquet
-pub fn write_parquet(ldf: LazyFrame, path: String) {
+/// Not yet supported in standard executor
+pub fn sink_parquet(ldf: LazyFrame, path: String) {
     // Selected compression not implemented yet
     let mut p = PathBuf::new();
     p.push(path);
@@ -92,4 +93,12 @@ pub fn write_parquet(ldf: LazyFrame, path: String) {
         },
     )
     .expect("Could not save");
+}
+
+pub fn write_parquet(ldf: LazyFrame, path: String) {
+    // Selected compression not implemented yet
+    let mut file = std::fs::File::create(path).unwrap();
+    ParquetWriter::new(&mut file)
+        .finish(&mut ldf.collect().expect("Could not collect"))
+        .unwrap();
 }
