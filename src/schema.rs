@@ -5,8 +5,15 @@ use sea_query::*;
 pub fn print_schema(ldf: LazyFrame) {
     let schema = ldf.schema().expect("Could not retreive schema");
     for f in schema.iter_fields() {
-        let n = f.name();
+        let mut unnamed_cols_counter = 0;
         let d = f.data_type().to_string();
+        let n = if f.name.is_empty() {
+            unnamed_cols_counter += 1;
+            format!("Column{}", unnamed_cols_counter)
+        } else {
+            f.name
+        };
+
         println!("{n} ({d})");
     }
 }
