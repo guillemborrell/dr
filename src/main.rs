@@ -53,6 +53,7 @@ fn main() {
         .subcommand(
             Command::new("sql")
                 .about("Runs a sql statement on the file")
+                .arg(arg!(-d --delimiter <String> "Column delimiter. Assume ,").required(false))
                 .arg(arg!([statement] "SQL statement"))
                 .arg(
                     arg!(-t --text ... "Input text instead of binary")
@@ -62,11 +63,14 @@ fn main() {
                 .arg(arg!(-d --delimiter <String> "Column delimiter").required(false)),
         )
         .subcommand(
-            Command::new("print").about("Pretty prints the table").arg(
-                arg!(-t --text ... "Inputs csv instead of binary")
-                    .required(false)
-                    .action(ArgAction::SetTrue),
-            ),
+            Command::new("print")
+                .about("Pretty prints the table")
+                .arg(arg!(-d --delimiter <String> "Column delimiter. Assume ,").required(false))
+                .arg(
+                    arg!(-t --text ... "Inputs csv instead of binary")
+                        .required(false)
+                        .action(ArgAction::SetTrue),
+                ),
         )
         .subcommand(
             Command::new("rpq")
@@ -101,6 +105,7 @@ fn main() {
         .subcommand(
             Command::new("wpq")
                 .about("Write to a paquet file")
+                .arg(arg!(-d --delimiter <String> "Column delimiter. Assume ,").required(false))
                 .arg(
                     arg!(-t --text ... "Input text instead of binary")
                         .required(false)
@@ -110,13 +115,17 @@ fn main() {
         )
         .get_matches();
     if let Some(_matches) = matches.subcommand_matches("csv") {
+        let delimiter = match _matches.get_one::<String>("delimiter") {
+            Some(delimiter) => delimiter.as_bytes()[0],
+            None => b',',
+        };
         let mut ldf = if _matches.get_flag("stdin") {
-            io::load_csv_from_stdin()
+            io::load_csv_from_stdin(delimiter)
         } else {
             let path = _matches
                 .get_one::<String>("path")
                 .expect("Please, provide a file");
-            io::read_csv(path.to_string())
+            io::read_csv(path.to_string(), delimiter)
         };
         if let Some(query) = _matches.get_one::<String>("query") {
             ldf = sql::execute(ldf, query);
@@ -139,9 +148,13 @@ fn main() {
             }
         }
     } else if let Some(_matches) = matches.subcommand_matches("sql") {
+        let delimiter = match _matches.get_one::<String>("delimiter") {
+            Some(delimiter) => delimiter.as_bytes()[0],
+            None => b',',
+        };
         if let Some(statement) = _matches.get_one::<String>("statement") {
             let ldf = if _matches.get_flag("text") {
-                io::load_csv_from_stdin()
+                io::load_csv_from_stdin(delimiter)
             } else {
                 io::read_ipc()
             };
@@ -151,8 +164,12 @@ fn main() {
             io::write_ipc(io::read_ipc());
         }
     } else if let Some(_matches) = matches.subcommand_matches("print") {
+        let delimiter = match _matches.get_one::<String>("delimiter") {
+            Some(delimiter) => delimiter.as_bytes()[0],
+            None => b',',
+        };
         let df = if _matches.get_flag("text") {
-            io::load_csv_from_stdin()
+            io::load_csv_from_stdin(delimiter)
         } else {
             io::read_ipc()
         };
@@ -187,9 +204,13 @@ fn main() {
             }
         }
     } else if let Some(_matches) = matches.subcommand_matches("wpq") {
+        let delimiter = match _matches.get_one::<String>("delimiter") {
+            Some(delimiter) => delimiter.as_bytes()[0],
+            None => b',',
+        };
         if let Some(path) = _matches.get_one::<String>("path") {
             let ldf = if _matches.get_flag("text") {
-                io::load_csv_from_stdin()
+                io::load_csv_from_stdin(delimiter)
             } else {
                 io::read_ipc()
             };

@@ -51,7 +51,7 @@ pub fn print_create(ldf: LazyFrame, table_name: &str, default_strlen: u32) {
         statements.push(table.to_string(PostgresQueryBuilder));
     }
 
-    // Finall print all statements
+    // Finallyls print all statements
     for statement in statements {
         println!("{};", statement);
     }

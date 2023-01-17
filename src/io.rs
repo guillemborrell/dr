@@ -5,8 +5,9 @@ use std::io::Read;
 use std::path::PathBuf;
 
 /// Read CSV file
-pub fn read_csv(path: String) -> LazyFrame {
+pub fn read_csv(path: String, delimiter: u8) -> LazyFrame {
     LazyCsvReader::new(path)
+        .with_delimiter(delimiter)
         .finish()
         .expect("Could not load file")
 }
@@ -31,14 +32,14 @@ pub fn read_ipc() -> LazyFrame {
 }
 
 /// Read CSV format from stdin and return a Polars DataFrame
-pub fn load_csv_from_stdin() -> LazyFrame {
+pub fn load_csv_from_stdin(delimiter: u8) -> LazyFrame {
     let mut buffer = Vec::new();
     let _res: () = match io::stdin().lock().read_to_end(&mut buffer) {
         Ok(_ok) => (),
         Err(_e) => (),
     };
     let cursor = io::Cursor::new(buffer);
-    match CsvReader::new(cursor).finish() {
+    match CsvReader::new(cursor).with_delimiter(delimiter).finish() {
         Ok(df) => df.lazy(),
         Err(_e) => LazyFrame::default(),
     }
