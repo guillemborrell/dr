@@ -37,6 +37,12 @@ fn main() {
         .subcommand(
             Command::new("schema")
                 .about("Several table schema related utilities")
+                .arg(
+                    arg!(-i --stdin ... "Read from stdin")
+                        .required(false)
+                        .action(ArgAction::SetTrue),
+                )
+                .arg(arg!(-d --delimiter <String> "Column delimiter. Assume ,").required(false))
                 .arg(arg!(-n --name <String> "Table name").required(false))
                 .arg(arg!(-l --strlen <String> "Default length for string columns").required(false))
                 .arg(
@@ -219,8 +225,18 @@ fn main() {
             eprintln!("Could now write to parquet");
         }
     } else if let Some(_matches) = matches.subcommand_matches("schema") {
+        let delimiter = match _matches.get_one::<String>("delimiter") {
+            Some(delimiter) => delimiter.as_bytes()[0],
+            None => b',',
+        };
+        let ldf = if _matches.get_flag("stdin") {
+            io::load_csv_from_stdin(delimiter)
+        } else {
+            io::read_ipc()
+        };
+
         if _matches.get_flag("summary") {
-            schema::print_schema(io::read_ipc());
+            schema::print_schema(ldf);
         } else if _matches.get_flag("postgresql") {
             let name = _matches
                 .get_one::<String>("name")
