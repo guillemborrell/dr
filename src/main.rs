@@ -245,7 +245,7 @@ fn main() {
                 Some(strlen) => strlen.parse::<u32>().unwrap(),
                 None => 128,
             };
-            schema::print_create(io::read_ipc(), name.as_str(), strlen);
+            schema::print_create(ldf, name.as_str(), strlen);
         }
     } else {
         println!("No command provided. Please execute dr --help")
