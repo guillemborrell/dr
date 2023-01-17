@@ -11,6 +11,11 @@ fn main() {
                 .about("Read csv, output arrow stream")
                 .arg(arg!([path] "Path to CSV file"))
                 .arg(arg!(-d --delimiter <String> "Column delimiter. Assume ,").required(false))
+                .arg(
+                    arg!(-i --stdin ... "Read from stdin")
+                        .required(false)
+                        .action(ArgAction::SetTrue),
+                )
                 .arg(arg!(-q --query <String> "Execute query on the file").required(false))
                 .arg(
                     arg!(-s --summary ... "Summarize the data")
@@ -97,7 +102,7 @@ fn main() {
             Command::new("wpq")
                 .about("Write to a paquet file")
                 .arg(
-                    arg!(-t --text ... "Output text instead of binary")
+                    arg!(-t --text ... "Input text instead of binary")
                         .required(false)
                         .action(ArgAction::SetTrue),
                 )
@@ -106,7 +111,12 @@ fn main() {
         .get_matches();
     if let Some(_matches) = matches.subcommand_matches("csv") {
         if let Some(path) = _matches.get_one::<String>("path") {
-            let mut ldf = io::read_csv(path.to_string());
+            let mut ldf = LazyFrame::default();
+            if _matches.get_flag("stdin") {
+                ldf = io::load_csv_from_stdin();
+            } else {
+                ldf = io::read_csv(path.to_string());
+            }
             if let Some(query) = _matches.get_one::<String>("query") {
                 ldf = sql::execute(ldf, query);
             }
