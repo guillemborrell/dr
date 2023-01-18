@@ -8,6 +8,7 @@ use std::path::PathBuf;
 pub fn read_csv(path: String, delimiter: u8) -> LazyFrame {
     LazyCsvReader::new(path)
         .with_delimiter(delimiter)
+        .with_infer_schema_length(None)
         .finish()
         .expect("Could not load file")
 }
