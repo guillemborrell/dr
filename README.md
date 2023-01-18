@@ -111,6 +111,44 @@ $ dr rpq data/yellow_tripdata_2014-01.parquet \
 └─────────┴─────────────────┘
 ```
 
+### Operate with SQL databases
+
+How many times did you have to insert a csv file (sometimes larger than memory) to a database? Tens of times? Hundreds? You've probably used Pandas for that, since it can infer the table's datatypes. So a simple data operation becomes a python script with Pandas and a driver for PostgreSQL as dependencies.
+
+Now dr can provide the table creation statement with a handful of columns:
+
+```
+$ head wine.csv | dr schema -i -p -n wine
+CREATE TABLE IF NOT EXISTS "wine" (  );
+ALTER TABLE "wine" ADD COLUMN "Wine" integer;
+ALTER TABLE "wine" ADD COLUMN "Alcohol" real;
+ALTER TABLE "wine" ADD COLUMN "Malic.acid" real;
+ALTER TABLE "wine" ADD COLUMN "Ash" real;
+ALTER TABLE "wine" ADD COLUMN "Acl" real;
+ALTER TABLE "wine" ADD COLUMN "Mg" integer;
+ALTER TABLE "wine" ADD COLUMN "Phenols" real;
+ALTER TABLE "wine" ADD COLUMN "Flavanoids" real;
+ALTER TABLE "wine" ADD COLUMN "Nonflavanoid.phenols" real;
+ALTER TABLE "wine" ADD COLUMN "Proanth" real;
+ALTER TABLE "wine" ADD COLUMN "Color.int" real;
+ALTER TABLE "wine" ADD COLUMN "Hue" real;
+ALTER TABLE "wine" ADD COLUMN "OD" real;
+ALTER TABLE "wine" ADD COLUMN "Proline" integer;
+```
+
+If you're fine with dr's choices you can then create the table and insert the file
+
+```
+$ head wine.csv | dr schema -i -p -n wine | psql
+$ tail -n +2 wine.csv | psql -c "\copy wine from stdin with (FORMAT 'csv')"
+```
+
+Since most databases can ingest and spit CSV files, some simple operations can be enhanced with dr, like storing the results of a query in a parquet file
+
+```
+$ psql -c "copy (select * from wine) to stdout with (FORMAT 'csv', HEADER)" | dr csv -i -P wine.pq
+```
+
 ## Reference
 
 Some commands that generate raw output in ipc format.
