@@ -1,5 +1,6 @@
 use clap::{arg, ArgAction, Command};
 
+// Generate command line options for the csv command
 pub fn gen_csv_command() -> Command {
     Command::new("csv")
         .about("Read csv, output arrow stream")
@@ -29,6 +30,7 @@ pub fn gen_csv_command() -> Command {
         )
 }
 
+// Generate command line options for the schema command
 pub fn gen_schema_command() -> Command {
     Command::new("schema")
         .about("Several table schema related utilities")
@@ -52,6 +54,7 @@ pub fn gen_schema_command() -> Command {
         )
 }
 
+// Generate command line options for the sql command
 pub fn gen_sql_command() -> Command {
     Command::new("sql")
         .about("Runs a sql statement on the file")
@@ -65,6 +68,7 @@ pub fn gen_sql_command() -> Command {
         .arg(arg!(-d --delimiter <String> "Column delimiter").required(false))
 }
 
+// Generate command line options for the rpq command
 pub fn gen_rpq_command() -> Command {
     Command::new("rpq")
         .about("Read parquet file")
@@ -93,6 +97,7 @@ pub fn gen_rpq_command() -> Command {
         )
 }
 
+// Generate command line options for the wpq command
 pub fn gen_wpq_command() -> Command {
     Command::new("wpq")
         .about("Write to a paquet file")
@@ -105,6 +110,7 @@ pub fn gen_wpq_command() -> Command {
         .arg(arg!([path] "Path to the new parquet file"))
 }
 
+// Generate command line options for the print command
 pub fn gen_print_command() -> Command {
     Command::new("print")
         .about("Pretty prints the table")

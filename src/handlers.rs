@@ -1,9 +1,10 @@
 use crate::io;
-use crate::sql;
 use crate::schema;
+use crate::sql;
 use clap::ArgMatches;
 use polars_lazy::prelude::LazyFrame;
 
+// Handle csv command
 pub fn handle_csv(matches: &ArgMatches) {
     let delimiter = match matches.get_one::<String>("delimiter") {
         Some(delimiter) => delimiter.as_bytes()[0],
@@ -39,6 +40,7 @@ pub fn handle_csv(matches: &ArgMatches) {
     }
 }
 
+// Handle the SQL command
 pub fn handle_sql(matches: &ArgMatches) {
     let delimiter = match matches.get_one::<String>("delimiter") {
         Some(delimiter) => delimiter.as_bytes()[0],
@@ -57,6 +59,7 @@ pub fn handle_sql(matches: &ArgMatches) {
     }
 }
 
+// Handle the print command
 pub fn handle_print(matches: &ArgMatches) {
     let delimiter = match matches.get_one::<String>("delimiter") {
         Some(delimiter) => delimiter.as_bytes()[0],
@@ -70,6 +73,7 @@ pub fn handle_print(matches: &ArgMatches) {
     println!("{}", df.collect().expect("Could not collect"));
 }
 
+// Handle the rpq command
 pub fn handle_rpq(matches: &ArgMatches) {
     let mut ldf = LazyFrame::default();
     if matches.get_flag("stdin") {
@@ -99,9 +103,9 @@ pub fn handle_rpq(matches: &ArgMatches) {
             }
         }
     }
-
 }
 
+// Handle the wpq command
 pub fn handle_wpq(matches: &ArgMatches) {
     let delimiter = match matches.get_one::<String>("delimiter") {
         Some(delimiter) => delimiter.as_bytes()[0],
@@ -119,6 +123,7 @@ pub fn handle_wpq(matches: &ArgMatches) {
     }
 }
 
+// Handle the schema command
 pub fn handle_schema(matches: &ArgMatches) {
     let delimiter = match matches.get_one::<String>("delimiter") {
         Some(delimiter) => delimiter.as_bytes()[0],

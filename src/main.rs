@@ -6,6 +6,7 @@ mod sql;
 use clap::command;
 
 fn main() {
+    // Commands definition
     let matches = command!()
         .subcommand(commands::gen_csv_command())
         .subcommand(commands::gen_schema_command())
@@ -14,6 +15,8 @@ fn main() {
         .subcommand(commands::gen_rpq_command())
         .subcommand(commands::gen_wpq_command())
         .get_matches();
+
+    // Send the flow to the corresponding handler
     if let Some(sub_matches) = matches.subcommand_matches("csv") {
         handlers::handle_csv(sub_matches);
     } else if let Some(sub_matches) = matches.subcommand_matches("sql") {
