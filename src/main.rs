@@ -8,6 +8,16 @@ use clap::command;
 fn main() {
     // Commands definition
     let matches = command!()
+        .author("Guillem Borrell")
+        .version(env!("CARGO_PKG_VERSION"))
+        .about("dr is a handy command line tool to handle csv an parquet files")
+        .long_about(
+            "dr is a handy command line tool to handle csv and parquet files.
+It is designed to integrate nicely with other command line tools
+like cat, sed, awk and database clients cli. You can find more
+information an a short tutorial https://git.guillemborrell.es/guillem/dr
+            ",
+        )
         .subcommand(commands::gen_csv_command())
         .subcommand(commands::gen_schema_command())
         .subcommand(commands::gen_sql_command())

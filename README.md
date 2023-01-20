@@ -16,21 +16,36 @@ You can install dr the rust way with `cargo install dr` but downloading a binary
 
 ```
 $ dr --help
-Command-line data file processing in Rust
+dr is a handy command line tool to handle csv and parquet files.
+It is designed to integrate nicely with other command line tools
+like cat, sed, awk and database clients cli. You can find more
+information an a short tutorial https://git.guillemborrell.es/guillem/dr
+            
 
 Usage: dr [COMMAND]
 
 Commands:
-  csv    Read csv, output arrow stream
-  sql    Runs a sql statement on the file
-  print  Pretty prints the table
-  rpq    Read parquet file
-  wpq    Write to a paquet file
-  help   Print this message or the help of the given subcommand(s)
+  csv
+          Read csv, output arrow stream
+  schema
+          Several table schema related utilities
+  sql
+          Runs a sql statement on the file
+  print
+          Pretty prints the table
+  rpq
+          Read parquet file
+  wpq
+          Write to a paquet file
+  help
+          Print this message or the help of the given subcommand(s)
 
 Options:
-  -h, --help     Print help information
-  -V, --version  Print version information
+  -h, --help
+          Print help information (use `-h` for a summary)
+
+  -V, --version
+          Print version information
 ```
 
 ## Howto
