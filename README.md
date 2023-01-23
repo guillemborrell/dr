@@ -155,7 +155,7 @@ If you're fine with dr's choices you can then create the table and insert the fi
 
 ```
 $ head wine.csv | dr schema -i -p -n wine | psql
-$ tail -n +2 wine.csv | psql -c "\copy wine from stdin with (FORMAT 'csv')"
+$ cat wine.csv | psql -c "\copy wine from stdin with (FORMAT 'csv', HEADER)"
 ```
 
 Since most databases can ingest and spit CSV files, some simple operations can be enhanced with dr, like storing the results of a query in a parquet file
