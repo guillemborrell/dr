@@ -195,7 +195,7 @@ On a very very old machine (Intel(R) Core(TM) i5-6500T CPU @ 2.50GHz), this take
 
 ## Caveats
 
-1. `dr` uses Polars to build and transform dataframes in Rust, and the entire table has to be loaded in memory. At the time when `dr` was created, streaming support didn't get along very well with SQL contexts.
+1. `dr` uses Polars to build and transform dataframes in Rust, and the entire table may be loaded in memory. At the time when `dr` was created, streaming support didn't get along very well with SQL contexts.
 
 2. `dr` uses Polars' SQLContext to execute the query which supports a small subset of the SQL language.
 
