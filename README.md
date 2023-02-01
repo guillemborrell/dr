@@ -205,7 +205,7 @@ $ cat large_csv_file.csv | iconv -f latin1 -t UTF-8 | psql -U username -h hostna
 The ingestion process is atomic, meaning that if `pgsql` fails to insert any record, no insertions will be made at all. If the insertion fails, probably because some column of type varchar can't fit the inferred type, you can change the type with:
 
 ```
-$ psql -U username -h hostname -c "alter table tablename alter column "LongDescription" type varchar(1024);" database
+$ psql -U username -h hostname -c 'alter table tablename alter column "LongDescription" type varchar(1024);' database
 ```
 
 And try inserting again
