@@ -23,7 +23,7 @@ pub fn handle_csv(matches: &ArgMatches) {
     }
     if matches.get_flag("summary") {
         let df = ldf.collect().expect("Could not collect");
-        println!("{}", df.describe(None));
+        println!("{:?}", df.describe(None));
     } else if matches.get_flag("head") {
         let df = ldf.fetch(5).expect("Could not fetch");
         println!("{}", df)
@@ -88,7 +88,7 @@ pub fn handle_rpq(matches: &ArgMatches) {
     }
     if matches.get_flag("summary") {
         let df = ldf.collect().expect("Could not collect");
-        println!("{}", df.describe(None));
+        println!("{:?}", df.describe(None));
     } else if matches.get_flag("head") {
         let df = ldf.fetch(5).expect("Could not fetch");
         println!("{}", df)
