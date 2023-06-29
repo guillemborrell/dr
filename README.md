@@ -151,12 +151,7 @@ ALTER TABLE "wine" ADD COLUMN "OD" real;
 ALTER TABLE "wine" ADD COLUMN "Proline" integer;
 ```
 
-If you're fine with dr's choices you can then create the table and insert the file
-
-```
-$ head wine.csv | dr schema -i -p -n wine | psql
-$ cat wine.csv | psql -c "\copy wine from stdin with (FORMAT 'csv', HEADER)"
-```
+More about this in the Examples section
 
 Since most databases can ingest and spit CSV files, some simple operations can be enhanced with dr, like storing the results of a query in a parquet file
 
@@ -178,7 +173,42 @@ Some commands that convert raw input in ipc format
 
 * Read from stdin in ipc and pretty print the table: `dr print`
 * Read from stdin in csv and pretty print the table: `dr print -t`
-* Read from stdin in ipc and write the data in parquet: `dr wpq [file.pq]` 
+* Read from stdin in ipc and write the data in parquet: `dr wpq [file.pq]`
+
+Some commands that read csv data from stdin
+
+* Read csv from stdin and print the schema as it would be inserted in a postgresql database: `dr schema -i -p -n tablename`
+* Reas csv from stdin and save as parquet, inferring types: `dr csv -i -P filename.pq`
+
+## Examples
+
+### Inserting CSV into postgres
+
+Assume that you were given a large (several GiB) with a weird (latin1) encoding, and you want to insert it into postgres. This dataset may be too large to store it in memory in one go, so you'd like to stream it into the database. You need to
+
+* Read the csv file
+* Infer the schema, and create a table
+* Change the encoding of the file to the same as the database
+
+You can use `dr` to turn this into a two-step process, and pipe the encoding conversion in one go. The first step would be to infer the schema of the resulting table and creating the table
+
+```
+$ head large_csv_file.csv | iconv -f latin1 -t utf-8 | dr schema -i -p -n tablename | pgsql -U username -h hostname database
+```
+
+The second step would be leveraging the `pgsql` command to write the contents of the file into the database
+
+```
+$ cat large_csv_file.csv | iconv -f latin1 -t UTF-8 | psql -U username -h hostname -c "\copy tablename from stdin with (FORMAT 'csv', HEADER)" database
+```
+
+The ingestion process is atomic, meaning that if `pgsql` fails to insert any record, no insertions will be made at all. If the insertion fails, probably because some column of type varchar can't fit the inferred type, you can change the type with:
+
+```
+$ psql -U username -h hostname -c 'alter table tablename alter column "LongDescription" type varchar(1024);' database
+```
+
+And try inserting again
 
 ## Performance
 
